@@ -1,8 +1,11 @@
 <template>
-  <div>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow-sm">
-      <div class="container">
+  <div class="nav-wrapper">
+    <nav class="navbar navbar-expand-lg glass-nav fixed-top">
+      <div class="container align-items-center">
+        <a class="brand d-flex align-items-center" href="#">
+          <span class="logo-pill">E</span>
+          <span class="ms-2 fw-bold">Edoc</span>
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -17,43 +20,35 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav me-auto">
             <li class="nav-item" v-if="userType === 'admin'">
-              <a class="nav-link" href="/admin"><i class="bi bi-house-door-fill"></i>Home</a>
+              <a class="nav-link" href="/admin">Home</a>
             </li>
             <li class="nav-item" v-if="userType === 'patient'">
-              <a class="nav-link" href="/patient-dash"><i class="bi bi-house-door-fill"></i>Home</a>
+              <a class="nav-link" href="/patient-dash">Home</a>
             </li>
             <li class="nav-item" v-if="userType === 'doctor'">
-              <a class="nav-link" href="/doctor-dash"><i class="bi bi-house-door-fill"></i>Home</a>
+              <a class="nav-link" href="/doctor-dash">Home</a>
             </li>
           </ul>
-          <ul class="navbar-nav ms-auto">
-            <div v-if="userType === 'doctor'">
-              <li class="nav-item">
-                <a class="nav-link" href="/appointment">Appointments</a>
-              </li>
-            </div>
-            <div v-if="userType === 'patient'">
-              <li class="nav-item">
-                <a class="nav-link" href="/view-prescriptions">History</a>
-              </li>
-            </div>
-            <div v-if="userType === 'patient'">
-              <li class="nav-item">
-                <a class="nav-link d-flex align-items-center" href="/profile">
-                  <img
-                    
-                    alt="avatar"
-                    :src="profilePic"
-                    class="small-avatar"
-                  />
-
-                  
-                </a>
-              </li>
-            </div>
+          <ul class="navbar-nav ms-auto align-items-center gap-2">
+            <li class="nav-item" v-if="userType === 'doctor'">
+              <a class="nav-link pill-link" href="/appointment">Appointments</a>
+            </li>
+            <li class="nav-item" v-if="userType === 'patient'">
+              <a class="nav-link pill-link" href="/view-prescriptions">History</a>
+            </li>
+            <li class="nav-item" v-if="userType === 'patient'">
+              <a class="nav-link profile-link d-flex align-items-center" href="/profile">
+                <img
+                  alt="avatar"
+                  :src="profilePic"
+                  class="small-avatar me-2"
+                />
+                <span class="d-none d-lg-inline">Profile</span>
+              </a>
+            </li>
             <li class="nav-item">
-              <a class="nav-link" href="#" @click="logout">
-                <i class="bi bi-box-arrow-right"></i> Logout
+              <a class="btn btn-sm btn-primary" href="#" @click="logout">
+                Logout
               </a>
             </li>
           </ul>
@@ -123,42 +118,80 @@ export default {
 </script>
 
 <style scoped>
-.navbar {
-  background-color: #f8f9fa; /* Light background color */
-  border-bottom: 1px solid #dee2e6; /* Bottom border for navbar */
+.nav-wrapper {
+  backdrop-filter: blur(6px);
 }
 
-.navbar-brand {
-  font-weight: bold; /* Make the brand name bold */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+  box-shadow: 0 10px 40px rgba(14, 165, 233, 0.08);
+  border-radius: 16px;
+  margin: 10px 16px;
+  padding: 8px 18px;
 }
 
-.nav-item {
-  margin-left: 15px; /* Space between nav items */
+.brand {
+  color: #0f172a;
+  font-size: 18px;
 }
 
-.nav-item a {
-  color: #495057; /* Text color for links */
-  transition: color 0.3s; /* Smooth transition for hover effect */
+.logo-pill {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.35);
 }
 
-.nav-item a:hover {
-  color: #007bff; /* Change color on hover */
+.nav-link {
+  font-weight: 600;
+  color: #0f172a;
+  padding: 8px 12px;
+  border-radius: 12px;
 }
 
-.nav-item.active a {
-  color: #007bff; /* Active link color */
-  font-weight: bold; /* Make active link bold */
+.nav-link:hover {
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
-.shadow-sm {
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important; /* Slight shadow for depth */
+.pill-link {
+  background: #e0f2fe;
+  color: #0284c7;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+}
+
+.profile-link {
+  background: rgba(14, 165, 233, 0.08);
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #0f172a;
 }
 
 .small-avatar {
-  width: 40px; /* Set width of the image */
-  height: 40px; /* Set height of the image */
-  object-fit: cover; /* Ensures the image fits the box while maintaining aspect ratio */
-  border-radius: 50%; /* Makes the image circular */
-  border: 2px solid #dee2e6; /* Optional: add a light border around the image */
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #e0f2fe;
+}
+
+.btn-primary {
+  padding: 8px 14px;
+}
+
+@media (max-width: 992px) {
+  .glass-nav {
+    margin: 0;
+    border-radius: 0;
+  }
 }
 </style>

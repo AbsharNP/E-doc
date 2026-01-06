@@ -1,41 +1,109 @@
 <template>
-    <div class="prescription-container">
-      <div class="header">
-        <h1>PRESCRIPTION</h1>
-        <p>Treatment Facility</p>
-        <div class="facility-info">
-          <div class="left">
-            <p  class="text-start"><strong>Address:</strong> {{ facilityAddress }}</p>
-            <p class="text-start"><strong>Phone:</strong> {{ facilityPhone }}</p>
-          </div>
-          <div class="right">
-            <p><strong>Attending Physician:</strong> Dr. {{ doctorName }}</p>
-          </div>
-        </div>
-      </div>
-  
-      <div class="patient-info">
-        <h2>Patient Info</h2>
-        <p><strong>Name:</strong> {{ appointment.name }}</p>
-        <span><p><strong>Age:</strong></p>
-        <input type="text" v-model="age" class="" required>
-        </span>
-        <p><strong>Appointment Date:</strong> {{ formatDate(appointment.session_date) }}</p>
-      </div>
-  
-      <div class="rx-section">
-        <h3><strong>Prescription</strong></h3>
-        <textarea 
-          v-model="prescription" 
-          placeholder="Enter prescription details here"
-          rows="5">
-        </textarea>
-      </div>
-  
-      <div class="submit-section">
-        <button class="btn btn-primary" @click="confirmSubmission">Submit Prescription</button>
+  <div class="prescription-page">
+    <div class="hero glass-panel">
+      <div class="hero-text">
+        <div class="pill">Treatment</div>
+        <h1>Prescription & plan</h1>
+        <p>
+          Review patient details, capture your prescription, and add treatments or scans
+          as a structured plan for this visit.
+        </p>
       </div>
     </div>
+
+    <div class="layout-grid">
+      <div class="card-elevated left-column">
+        <div class="section-heading">Patient</div>
+        <div class="patient-info">
+          <p><span class="label">Name</span><span class="value">{{ appointment.name }}</span></p>
+          <p>
+            <span class="label">Appointment date</span>
+            <span class="value">{{ formatDate(appointment.session_date) }}</span>
+          </p>
+          <div class="age-row">
+            <span class="label">Age</span>
+            <input
+              type="number"
+              v-model="age"
+              min="0"
+              class="form-control age-input"
+              placeholder="Enter age"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="section-heading">Facility</div>
+        <div class="facility-info">
+          <p class="value"><strong>Address:</strong> {{ facilityAddress }}</p>
+          <p class="value"><strong>Phone:</strong> {{ facilityPhone }}</p>
+          <p class="value"><strong>Attending:</strong> Dr. {{ doctorName }}</p>
+        </div>
+      </div>
+
+      <div class="card-elevated right-column">
+        <div class="section-heading">Prescription</div>
+        <textarea
+          v-model="prescription"
+          class="form-control rx-textarea"
+          placeholder="Enter prescription details here"
+          rows="5"
+        ></textarea>
+
+        <div class="section-heading mt-3">Treatments</div>
+        <div class="multi-list">
+          <div
+            class="multi-item"
+            v-for="(item, index) in treatments"
+            :key="'t-' + index"
+          >
+            <input
+              v-model="treatments[index]"
+              type="text"
+              class="form-control"
+              :placeholder="`Treatment ${index + 1}`"
+            />
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm pill-btn mt-2"
+            @click="addTreatmentField"
+          >
+            + Add treatment
+          </button>
+        </div>
+
+        <div class="section-heading mt-3">Scans / investigations</div>
+        <div class="multi-list">
+          <div
+            class="multi-item"
+            v-for="(item, index) in scans"
+            :key="'s-' + index"
+          >
+            <input
+              v-model="scans[index]"
+              type="text"
+              class="form-control"
+              :placeholder="`Scan / investigation ${index + 1}`"
+            />
+          </div>
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm pill-btn mt-2"
+            @click="addScanField"
+          >
+            + Add scan / investigation
+          </button>
+        </div>
+
+        <div class="submit-section">
+          <button class="btn btn-primary pill-btn" @click="confirmSubmission">
+            Submit prescription
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
   
 <script>
@@ -53,6 +121,8 @@ export default {
             doctorId: localStorage.getItem('doctorId'),
             prescription: '',  
             age:'',
+            treatments: [''],
+            scans: [''],
             facilityAddress: '123 Clinic Street, City Name',
             facilityPhone: '+1-234-567-890',
             doctorName: localStorage.getItem('userName'), // Attending physician
@@ -99,9 +169,28 @@ export default {
             });
         },
         submitPrescription() {
+            const treatmentLines = this.treatments
+                .filter((t) => t && t.trim().length > 0)
+                .map((t) => `- ${t.trim()}`)
+                .join('\n');
+
+            const scanLines = this.scans
+                .filter((s) => s && s.trim().length > 0)
+                .map((s) => `- ${s.trim()}`)
+                .join('\n');
+
+            let composedPrescription = this.prescription || '';
+
+            if (treatmentLines) {
+                composedPrescription += `\n\nTreatments:\n${treatmentLines}`;
+            }
+            if (scanLines) {
+                composedPrescription += `\n\nScans / Investigations:\n${scanLines}`;
+            }
+
             const prescriptionData = {
                 appointmentId: this.$route.params.id,
-                prescription: this.prescription,
+                prescription: composedPrescription,
                 age: this.age,
                 treatment_status: 1, // Assuming treatment status 1 means completed
             };
@@ -130,65 +219,115 @@ export default {
             const date = new Date(dateString);
             return date.toLocaleDateString('en-GB', options);  // Format date as 'dd/mm/yyyy'
         },
+        addTreatmentField() {
+            this.treatments.push('');
+        },
+        addScanField() {
+            this.scans.push('');
+        },
     },
 };
 </script>
 
 <style scoped>
-.prescription-container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
+.prescription-page {
+  max-width: 1200px;
+  margin: 20px auto 40px;
+  padding: 0 18px 32px;
 }
 
-.header {
-    text-align: center;
-    margin-bottom: 30px;
+.hero {
+  padding: 22px 26px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #e0f2fe, #f8fbff);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  margin-bottom: 18px;
+}
+
+.hero-text h1 {
+  margin: 8px 0;
+  font-size: 24px;
+}
+
+.hero-text p {
+  color: #475569;
+  max-width: 540px;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.6fr);
+  gap: 18px;
+}
+
+.left-column,
+.right-column {
+  padding: 18px 18px 16px;
+}
+
+.patient-info p {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0;
+}
+
+.label {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.value {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.age-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.age-input {
+  max-width: 120px;
 }
 
 .facility-info {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px 0;
+  margin-top: 8px;
 }
 
-.left,
-.right {
-    width: 48%;
+.facility-info .value {
+  display: block;
+  margin-bottom: 4px;
 }
 
-.patient-info,
-.rx-section {
-    margin-bottom: 20px;
+.rx-textarea {
+  resize: vertical;
 }
 
-.rx-section {
-    border-top: 1px solid #000;
-    padding-top: 10px;
+.multi-list {
+  margin-top: 6px;
 }
 
-textarea {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    margin-top: 10px;
+.multi-item + .multi-item {
+  margin-top: 6px;
 }
 
 .submit-section {
-    text-align: right;
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.btn {
-    padding: 10px 20px;
-    background-color: #007bff;
-    border: none;
-    color: white;
-    cursor: pointer;
+.pill-btn {
+  border-radius: 999px;
+  font-weight: 600;
 }
 
-.btn:hover {
-    background-color: #0056b3;
+@media (max-width: 768px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

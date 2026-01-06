@@ -1,93 +1,120 @@
 <template>
-  <div class="container-fluid vh-100 d-flex flex-column">
-    <!-- Header Section -->
-    <div class="card p-4 mb-4 shadow-sm">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h1 class="h4">Welcome!</h1>
-          <img 
-            v-if="profilePic" 
-            alt="avatar" 
-            :src="profilePic" 
-            class="rounded small-avatar" 
-          />
-          <h2 class="h2"><span class="un">{{ userName }}</span></h2>
-          <p class="text-muted">
-            Haven't any idea about doctors? No problem, let's jump to the 
-            <strong>
-              "<a href="/doc-list" class="doctor-link">All Doctors</a>"
-            </strong>.<br />
-            Track your past and future appointments history.
-            Also find out the expected arrival time of your doctor or medical consultant.
-          </p>
+  <div class="page">
+    <div class="hero glass-panel">
+      <div class="hero-text">
+        <div class="pill">Hi {{ userName || 'there' }}</div>
+        <h1>Book, track, and manage your care effortlessly</h1>
+        <p>
+          Jump into the booking wizard to find the right doctor, secure a slot,
+          and keep upcoming visits organized.
+        </p>
+        <div class="hero-actions">
+          <router-link to="/doc-list" class="btn btn-primary">Start booking</router-link>
+          <router-link to="/view-prescriptions" class="btn btn-outline-primary ms-2">View history</router-link>
         </div>
-        <div class="text-center date-container" style="width: 200px;">
-          <p class="mb-0 text-muted">Today's Date</p>
-          <h3 class="date-display">{{ todayDate }}</h3>
-        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="date-chip">Today · {{ todayDate }}</div>
+        <img v-if="profilePic" :src="profilePic" alt="profile" class="hero-avatar" />
       </div>
     </div>
 
-    <!-- Appointments Section -->
-    <div>
-      <h2 class="my-4">My Appointments</h2>
-
-      <div v-if="error" class="alert alert-danger">{{ error }}</div>
-
-      <div class="row">
-        <div class="col-md-4 col-lg-3 mb-4" v-for="appointment in appointments" :key="appointment.id">
-          <div class="card appointment-card">
-            <div class="card-body">
-              <h5 class="card-title">{{ capitalizeWords(appointment.name) }}</h5>
-              <p class="card-text">
-                <strong>Date:</strong> {{ formatDate(appointment.appsession.session_date) }}<br />
-                <strong>Doctor:</strong> {{ capitalizeWords(appointment.dr_name) }}<br />
-                <strong>Status:</strong> {{ appointment.treatment_status ? 'Completed' : 'Scheduled' }}
-              </p>
-              <div class="d-flex justify-content-between">
-                <router-link 
-                  v-if="appointment.treatment_status === 1" 
-                  :to="`/view-prescriptions`" 
-                  class="btn btn-outline-info"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                  stroke-width="2" stroke-linecap="round" 
-                  stroke-linejoin="round" class="feather feather-eye">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </router-link>
-                <button 
-                  v-else 
-                  class="btn btn-outline-danger" 
-                  @click="deleteAppointment(appointment.id)"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-                  viewBox="0 0 24 24" fill="none" 
-                  stroke="currentColor" stroke-width="2" 
-                  stroke-linecap="round" stroke-linejoin="round" 
-                  class="feather feather-trash">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </div>
+    <div class="layout-grid">
+      <div class="card-elevated wizard-card">
+        <div class="section-heading">Book an appointment</div>
+        <div class="wizard-steps">
+          <div class="step">
+            <div class="step-badge">1</div>
+            <div>
+              <h4>Choose a doctor</h4>
+              <p>Browse specialties and availability.</p>
+              <router-link to="/doc-list" class="link">Find doctor</router-link>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-badge">2</div>
+            <div>
+              <h4>Select a session</h4>
+              <p>Pick a slot that fits your schedule.</p>
+              <router-link to="/available-sessions" class="link">Available sessions</router-link>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-badge">3</div>
+            <div>
+              <h4>Confirm & track</h4>
+              <p>Get reminders and access visit details.</p>
+              <router-link to="/patient-dash" class="link">My dashboard</router-link>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Cards Section -->
-    <div class="row mb-3 flex-fill justify-content-center">
-      <div class="col-md-4 col-lg-3 d-flex align-items-stretch mb-3" v-for="card in cards" :key="card.title">
-        <router-link :to="card.link" class="text-decoration-none flex-fill">
-          <div class="card text-center p-3 shadow-sm custom-card capsule-card">
-            <h4 class="display-6 card-title">{{ card.title }}</h4>
-            <p class="card-description">{{ card.description }}</p>
+      <div class="card-elevated appointments-card">
+        <div class="section-heading">Upcoming appointments</div>
+        <div v-if="error" class="alert alert-danger">{{ error }}</div>
+        <div v-if="appointments.length === 0" class="empty-state">
+          <p>No appointments yet. Book your first visit.</p>
+          <router-link to="/doc-list" class="btn btn-primary btn-sm">Book now</router-link>
+        </div>
+        <div class="appointments-grid">
+          <div
+            class="appointment-tile"
+            v-for="appointment in appointments"
+            :key="appointment.id"
+          >
+            <div class="tile-header">
+              <div>
+                <p class="label">Doctor</p>
+                <h4>{{ capitalizeWords(appointment.dr_name) }}</h4>
+              </div>
+              <span :class="['status', appointment.treatment_status ? 'success' : 'pending']">
+                {{ appointment.treatment_status ? 'Completed' : 'Scheduled' }}
+              </span>
+            </div>
+            <div class="tile-body">
+              <div>
+                <p class="label">Date</p>
+                <p class="value">{{ formatDate(appointment.appsession.session_date) }}</p>
+              </div>
+              <div>
+                <p class="label">Patient</p>
+                <p class="value">{{ capitalizeWords(appointment.name) }}</p>
+              </div>
+            </div>
+            <div class="tile-actions">
+              <router-link
+                v-if="appointment.treatment_status === 1"
+                :to="`/view-prescriptions`"
+                class="btn btn-outline-primary btn-sm"
+              >
+                View prescription
+              </router-link>
+              <button
+                v-else
+                class="btn btn-outline-danger btn-sm"
+                @click="deleteAppointment(appointment.id)"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </router-link>
+        </div>
+      </div>
+
+      <div class="card-elevated quick-links">
+        <div class="section-heading">Quick actions</div>
+        <div class="quick-grid">
+          <router-link
+            v-for="card in cards"
+            :key="card.title"
+            :to="card.link"
+            class="quick-card"
+          >
+            <h4>{{ card.title }}</h4>
+            <p>{{ card.description }}</p>
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -180,79 +207,208 @@ export default {
 </script>
 
 <style scoped>
-.container-fluid {
-  padding: 20px; /* Add padding for better spacing */
+.page {
+  max-width: 1200px;
+  margin: 20px auto 40px;
+  padding: 0 18px 32px;
 }
 
-.custom-card {
-  background-color: #506690; /* Custom background color */
-  color: white; /* White text color for contrast */
-  transition: transform 0.3s, box-shadow 0.3s; /* Smooth transition for hover effects */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #e0f2fe, #f8fbff);
+  border: 1px solid rgba(14, 165, 233, 0.2);
 }
 
-.capsule-card {
-  border-radius: 50px; /* Increase border radius for a capsule effect */
-  padding: 20px; /* Add padding for better spacing inside the card */
+.hero-text h1 {
+  margin: 10px 0;
+  font-size: 28px;
 }
 
-.custom-card:hover {
-  transform: scale(1.05); /* Slightly increase size on hover */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Add shadow effect on hover */
+.hero-text p {
+  color: #475569;
+  max-width: 520px;
 }
 
-.card-title {
-  font-size: 1.25rem; /* Adjust font size for card title */
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.card-description {
-  font-size: 0.875rem; /* Adjust font size for card description */
+.date-chip {
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #0ea5e9;
+  color: #fff;
+  font-weight: 700;
 }
 
-.un {
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  color: #515365;
+.hero-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e0f2fe;
+  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.25);
 }
 
-.doctor-link {
-  color: #515365; 
-  font-weight: bold; 
-  transition: color 0.3s ease; 
+.hero-actions {
+  margin-top: 12px;
 }
 
-.doctor-link:hover {
-  color: #1d08fb; /* Darker shade on hover */
-}
-
-.table {
-  margin-top: 20px; /* You can adjust this value for more/less space */
-  width: 100%;
-}
-
-.table th,
-.table td {
-  text-align: center;
-}
-
-.alert {
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
   margin-top: 20px;
 }
 
-.vh-100 {
-  height: 100vh;
+.wizard-card {
+  padding: 22px;
 }
 
-.btn-danger {
-  margin-left: 10px;
+.wizard-steps {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
 }
-.gg {
-  margin-bottom: 40px;
+
+.step {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px dashed rgba(14, 165, 233, 0.2);
+  border-radius: 16px;
+  background: #f8fbff;
 }
-.small-avatar {
-  width: 100px; 
-  height: 100px;
-  object-fit: cover; 
-  border-radius: 50%; 
-  /* border: 2px solid #dee2e6;  */
-  box-shadow: 2px;
+
+.step-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #0ea5e9;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.2);
+}
+
+.step h4 {
+  margin: 0;
+}
+
+.link {
+  font-weight: 700;
+  color: #0ea5e9;
+}
+
+.appointments-card {
+  padding: 22px;
+}
+
+.appointments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.appointment-tile {
+  padding: 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.status.success {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.status.pending {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.tile-body {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.label {
+  color: #94a3b8;
+  margin: 0;
+}
+
+.value {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+
+.tile-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quick-links {
+  padding: 22px;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.quick-card {
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #ffffff, #f8fbff);
+  box-shadow: 0 10px 24px rgba(14, 165, 233, 0.08);
+  color: #0f172a;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  padding: 20px 0;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .tile-body {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

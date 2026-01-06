@@ -45,7 +45,7 @@ const routes = [
     name: 'admin',
     component: () =>
       import(
-        /* webpackChunkName: "adminhome" */ './components/views/pages/admin/adminHome.vue'
+        /* webpackChunkName: "adminhome" */ './components/views/pages/admin/adminHomeModern.vue'
       ),
     meta: { layout: "app" , requiresAuth: true, userType: 'admin'},
   },
@@ -74,7 +74,7 @@ const routes = [
     name: 'doctor-dash',
     component: () =>
       import(
-        /* webpackChunkName: "dochome" */ './components/views/pages/doctor/docHome.vue'
+        /* webpackChunkName: "dochome" */ './components/views/pages/doctor/docHomeModern.vue'
       ),
     meta: { layout: "app" , requiresAuth: true, userType: 'doctor'},
   },

@@ -1,66 +1,72 @@
 <template>
-  <div class="container-fluid vh-100 d-flex flex-column">
-    <div class="row flex-grow-1">
-      <div class="col-12 d-flex flex-column align-items-center">
-        <div class="container py-4">
-          <h3>Your Appointments</h3>
+  <div class="doctor-appointments-page">
+    <div class="hero glass-panel">
+      <div class="hero-text">
+        <div class="pill">Schedule</div>
+        <h1>Your appointments</h1>
+        <p>
+          Switch between today’s patients and your full schedule,
+          then jump straight into treatment when you’re ready.
+        </p>
+      </div>
+    </div>
 
-          <!-- Buttons for filtering appointments -->
-          <div class="mb-3 d-flex justify-content-center">
-            <button 
-              class="btn btn-primary rounded-btn mx-2" 
-              :class="{ active: showToday }" 
-              @click="fetchTodayAppointments"
-            >
-              Today's Appointments
-            </button>
-            <button 
-              class="btn btn-secondary rounded-btn mx-2" 
-              :class="{ active: showAll }" 
-              @click="fetchAllAppointments"
-            >
-              All Appointments
-            </button>
-          </div>
+    <div class="filters card-elevated">
+      <div class="filter-toggle">
+        <button
+          class="btn pill-btn"
+          :class="showToday ? 'btn-primary' : 'btn-outline-primary'"
+          @click="fetchTodayAppointments"
+        >
+          Today
+        </button>
+        <button
+          class="btn pill-btn"
+          :class="showAll ? 'btn-primary' : 'btn-outline-primary'"
+          @click="fetchAllAppointments"
+        >
+          All
+        </button>
+      </div>
+    </div>
 
-          <!-- Flexible container for the table -->
-          <div class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Patient Name</th>
-                  <th>Session Date</th>
-                  <th v-if="showToday">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-if="appointments.length === 0">
-                  <td colspan="3" class="text-center">No appointments found.</td> 
-                </tr>
-                <tr v-for="appointment in appointments.slice(0, 5)" :key="appointment.id">
-                  <td>{{ appointment.name }}</td>
-                  <td>{{ appointment.session_date }}</td> 
-                  <td v-if="showToday">
-                    <router-link 
-                      :to="`/treatment/${appointment.id}`" 
-                      :class="[ 
-                        'btn', 
-                        appointment.treatment_status === 1 ? 'btn-outline-secondary' : 'btn-success',
-                        'rounded-btn', 
-                        'd-flex', 
-                        'align-items-center' 
-                      ]"
-                    >
-                      Go
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right ml-2" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M10.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L9.293 7.5H2.5a.5.5 0 0 0 0 1h6.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-                      </svg>
-                    </router-link>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <div class="card-elevated table-card">
+      <div class="section-heading">Appointments</div>
+      <div class="table-shell">
+        <div class="table-header-row">
+          <span>Patient</span>
+          <span>Date</span>
+          <span>Status</span>
+          <span class="text-end" v-if="showToday">Action</span>
+        </div>
+        <div v-if="appointments.length === 0" class="empty-row">
+          No appointments found.
+        </div>
+        <div
+          v-for="appointment in appointments.slice(0, 5)"
+          :key="appointment.id"
+          class="table-row"
+        >
+          <span>{{ appointment.name }}</span>
+          <span>{{ appointment.session_date }}</span>
+          <span>
+            <span
+              :class="[
+                'status-pill',
+                appointment.treatment_status === 1 ? 'done' : 'pending'
+              ]"
+            >
+              {{ appointment.treatment_status === 1 ? 'Completed' : 'Pending' }}
+            </span>
+          </span>
+          <span class="text-end" v-if="showToday">
+            <router-link
+              :to="`/treatment/${appointment.id}`"
+              class="btn btn-primary btn-sm pill-btn"
+            >
+              Open
+            </router-link>
+          </span>
         </div>
       </div>
     </div>
@@ -131,52 +137,117 @@ export default {
 </script>
 
 <style scoped>
-.container-fluid {
-  height: 100vh;
+.doctor-appointments-page {
+  max-width: 1100px;
+  margin: 20px auto 40px;
+  padding: 0 18px 32px;
 }
 
-.table-responsive {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  overflow-x: auto;
+.hero {
+  padding: 22px 26px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #e0f2fe, #f8fbff);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  margin-bottom: 18px;
 }
 
-.table {
-  margin-top: 1rem;
-  width: 100%;
-  border-collapse: collapse;
+.hero-text h1 {
+  margin: 8px 0;
+  font-size: 24px;
 }
 
-.table th,
-.table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
+.hero-text p {
+  color: #475569;
+  max-width: 540px;
 }
 
-.table-striped tbody tr:nth-of-type(odd) {
-  background-color: #f8f9fa;
+.filters {
+  padding: 14px 18px;
+  margin-bottom: 18px;
 }
 
-.table tbody tr:hover {
-  background-color: #e9ecef;
-  cursor: pointer;
+.filter-toggle {
+  display: inline-flex;
+  gap: 8px;
 }
 
-.rounded-btn {
-  border-radius: 30px;
+.table-card {
+  padding: 18px 18px 16px;
 }
 
-.active {
-  background-color: #28a745 !important;
-  color: white;
+.table-shell {
+  margin-top: 10px;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.05);
+  padding: 10px 16px 12px;
+}
+
+.table-header-row,
+.table-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1.2fr 1.1fr 0.9fr;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.table-header-row {
+  font-weight: 700;
+  color: #64748b;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.table-row {
+  padding: 6px 0;
+  border-radius: 10px;
+}
+
+.table-row:nth-child(odd) {
+  background: #f8fafc;
+}
+
+.empty-row {
+  padding: 12px 0;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.text-end {
+  text-align: right;
+}
+
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pill.done {
+  background: #ecfdf3;
+  color: #15803d;
+}
+
+.status-pill.pending {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.pill-btn {
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
-  .table th, .table td {
-    padding: 10px;
-    font-size: 0.9rem;
+  .table-header-row,
+  .table-row {
+    grid-template-columns: 1.4fr 1.3fr 1.1fr 0.9fr;
+    font-size: 13px;
   }
 }
 </style>
